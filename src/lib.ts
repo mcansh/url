@@ -4,15 +4,23 @@ export function url(
 ) {
   let result = "";
 
+  // build url
   strings.forEach((string, index) => {
     let value = values[index];
-    let trimmed = value?.trim();
-    if (trimmed === "" || trimmed === null || trimmed === undefined) {
-      return;
-    }
-
-    result += string + encodeURIComponent(trimmed);
+    result += value ? string + value : string;
   });
 
-  return result;
+  // validate url
+  let u = new URL(result);
+  let sp = new URLSearchParams();
+
+  // loop over search params and add only if there is a value
+  for (let [key, value] of u.searchParams.entries()) {
+    if (value) sp.set(key, value);
+  }
+
+  // update search params
+  u.search = sp.toString();
+
+  return u.toString();
 }

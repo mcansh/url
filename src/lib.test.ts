@@ -2,27 +2,38 @@ import { test, expect } from "vitest";
 import { url } from "./lib";
 
 test("empty url", () => {
-  expect(url``, "");
+  expect(() => url``).toThrowError();
 });
 
 test("basic url", () => {
-  expect(url`https://site.com/path`, "https://site.com/path");
+  expect(url`https://site.com`).toEqual("https://site.com/");
 });
 
-test("interpolated url", () => {
+test("uninterpolated url", () => {
+  expect(url`https://site.com/path`).toEqual("https://site.com/path");
+});
+
+test("interpolated url with values", () => {
   let q = "my search";
-  expect(
-    url`https://site.com/path?q=${q}`,
-    "https://site.com/path?q=my%20search",
-  );
+  let actual = url`https://site.com/path?q=${q}`;
+  let expected = "https://site.com/path?q=my+search";
+  expect(actual).toEqual(expected);
 });
 
-test("interpolated url with undefined and null values", () => {
+test("interpolated url with only undefined/null values", () => {
+  let filter = undefined;
+  let user = null;
+  let q = undefined;
+  let actual = url`https://site.com/path?q=${q}&user=${user}&filter=${filter}`;
+  let expected = "https://site.com/path";
+  expect(actual).toEqual(expected);
+});
+
+test("interpolated url with valid, and undefined/null values", () => {
   let filter = undefined;
   let user = null;
   let q = "my search";
-  expect(
-    url`https://site.com/path?q=${q}&user=${user}&filter=${filter}`,
-    "https://site.com/path?q=my%20search",
-  );
+  let actual = url`https://site.com/path?q=${q}&user=${user}&filter=${filter}`;
+  let expected = "https://site.com/path?q=my+search";
+  expect(actual).toEqual(expected);
 });
