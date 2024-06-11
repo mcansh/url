@@ -37,3 +37,12 @@ test("interpolated url with valid, and undefined/null values", () => {
   let expected = "https://site.com/path?q=my+search";
   expect(actual).toEqual(expected);
 });
+
+test("url with all possible options", () => {
+  let filter = undefined;
+  let user = null;
+  let q = "my search";
+  let actual = url`https://user:pass@site.com:8080/path?q=${q}&user=${user}&filter=${filter}#hash`;
+  let expected = "https://user:pass@site.com:8080/path?q=my+search#hash";
+  expect(actual).toEqual(expected);
+});
