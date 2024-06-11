@@ -10,6 +10,9 @@ export function url(
     result += value ? string + value : string;
   });
 
+  if (!URL.canParse(result)) {
+    throw new TypeError(`Invalid URL: "${result}"`);
+  }
   // validate url
   let u = new URL(result);
   let sp = new URLSearchParams();

@@ -3,7 +3,7 @@ import { url } from "./lib";
 
 test("empty url", () => {
   expect(() => url``).toThrowErrorMatchingInlineSnapshot(
-    `[TypeError: Invalid URL]`,
+    `[TypeError: Invalid URL: ""]`,
   );
 });
 
