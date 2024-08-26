@@ -3,7 +3,7 @@ import { url } from "./lib";
 
 test("empty url", () => {
   expect(() => url``).toThrowErrorMatchingInlineSnapshot(
-    `[TypeError: Invalid URL: ""]`,
+    `[TypeError: Invalid URL: ""]`
   );
 });
 
@@ -24,7 +24,7 @@ test("basic url", () => {
 
 test("uninterpolated url", () => {
   expect(url`https://site.com/path`).toMatchInlineSnapshot(
-    `"https://site.com/path"`,
+    `"https://site.com/path"`
   );
 });
 
@@ -50,12 +50,22 @@ test("interpolated url with valid, and undefined/null values", () => {
   expect(actual).toMatchInlineSnapshot(`"https://site.com/path?q=my+search"`);
 });
 
-test("url with all possible options", () => {
+test("url with auth, port, query, hash", () => {
   let filter = undefined;
   let user = null;
   let q = "my search";
   let actual = url`https://user:pass@site.com:8080/path?q=${q}&user=${user}&filter=${filter}#hash`;
   expect(actual).toMatchInlineSnapshot(
-    `"https://user:pass@site.com:8080/path?q=my+search#hash"`,
+    `"https://user:pass@site.com:8080/path?q=my+search#hash"`
+  );
+});
+
+test("url with auth, port, query, hash", () => {
+  let filter = undefined;
+  let user = "1";
+  let q = null;
+  let actual = url`https://user:pass@site.com:8080/path?q=${q}&user=${user}&filter=${filter}#hash`;
+  expect(actual).toMatchInlineSnapshot(
+    `"https://user:pass@site.com:8080/path?user=1#hash"`
   );
 });
