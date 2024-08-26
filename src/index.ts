@@ -1,1 +1,1 @@
-export { url } from "./lib.js";
+export { url, urlString } from "./lib.js";

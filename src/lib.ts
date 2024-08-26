@@ -1,7 +1,14 @@
+export function urlString(
+  strings: TemplateStringsArray,
+  ...values: Array<string | undefined | null>
+): string {
+  return url(strings, ...values).toString();
+}
+
 export function url(
   strings: TemplateStringsArray,
   ...values: Array<string | undefined | null>
-) {
+): URL {
   let result = "";
 
   // build url
@@ -25,5 +32,5 @@ export function url(
   // update search params
   u.search = sp.toString();
 
-  return u.toString();
+  return u;
 }
