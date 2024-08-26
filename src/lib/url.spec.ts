@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import { urlString } from "./lib.js";
+import { urlString } from "./url.js";
 
 test("empty url", () => {
   assert.throws(() => urlString``, `[TypeError: Invalid URL: ""]`);
