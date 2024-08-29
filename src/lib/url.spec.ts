@@ -1,25 +1,54 @@
 import * as assert from "node:assert/strict";
-import { test } from "node:test";
+import { describe, test } from "node:test";
 import { urlString } from "./url.js";
 
-test("empty url", () => {
-  assert.throws(() => urlString``, `[TypeError: Invalid URL: ""]`);
+describe("invalid", () => {
+  test("not passed a url", () => {
+    assert.throws(() => urlString`hello world`, {
+      name: "TypeError",
+      message: 'Invalid URL: "hello world"',
+    });
+  });
+
+  test("empty string", () => {
+    assert.throws(() => urlString``, {
+      name: "TypeError",
+      message: `Invalid URL: ""`,
+    });
+  });
+
+  test("called as function");
+  assert.throws(() => urlString(""), {
+    name: "TypeError",
+    message: `function must be used as template string`,
+  });
 });
 
-test("basic url", () => {
-  assert.equal(urlString`ssh://site.com`, "ssh://site.com");
-  assert.equal(urlString`data://site.com`, "data://site.com");
-  assert.equal(urlString`mailto://site.com`, "mailto://site.com");
-  assert.equal(urlString`tel://site.com`, "tel://site.com");
+/**
+ * note that the URL constructor will add a trailing slash
+ * to the url for certain protocols
+ */
 
-  // note that the URL constructor will add a trailing slash to the url
-  // for certain protocols
-  assert.equal(urlString`http://site.com`, "http://site.com/");
-  assert.equal(urlString`https://site.com`, "https://site.com/");
-  assert.equal(urlString`ftp://site.com`, "ftp://site.com/");
-  assert.equal(urlString`ws://site.com`, "ws://site.com/");
-  assert.equal(urlString`wss://site.com`, "wss://site.com/");
-  assert.equal(urlString`file://site.com`, "file://site.com/");
+const cases = [
+  [`ssh://site.com`, "ssh://site.com"],
+  [`data://site.com`, "data://site.com"],
+  [`mailto://site.com`, "mailto://site.com"],
+  [`tel://site.com`, "tel://site.com"],
+  [`http://site.com`, "http://site.com/"],
+  [`https://site.com`, "https://site.com/"],
+  [`https://site.com?hello`, "https://site.com/"],
+  [`ftp://site.com`, "ftp://site.com/"],
+  [`ws://site.com`, "ws://site.com/"],
+  [`wss://site.com`, "wss://site.com/"],
+  [`file://site.com`, "file://site.com/"],
+] as const;
+
+describe("basic urls", () => {
+  for (let [input, expected] of cases) {
+    test(`${input} -> ${expected}`, () => {
+      assert.equal(urlString`${input}`, expected);
+    });
+  }
 });
 
 test("non-interpolated url", () => {

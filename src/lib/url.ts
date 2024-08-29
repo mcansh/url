@@ -1,36 +1,40 @@
 export function urlString(
-  strings: TemplateStringsArray,
-  ...values: Array<string | undefined | null>
+  strings: TemplateStringsArray | string,
+  ...values: Array<unknown>
 ): string {
   return url(strings, ...values).toString();
 }
 
 export function url(
-  strings: TemplateStringsArray,
-  ...values: Array<string | undefined | null>
+  strings: TemplateStringsArray | string,
+  ...values: Array<unknown>
 ): URL {
+  if (typeof strings === "string") {
+    throw new TypeError(`function must be used as template string`);
+  }
+
   let result = "";
 
   // build url
-  strings.forEach((string, index) => {
+  strings.raw.forEach((string, index) => {
     let value = values[index];
     result += value ? string + value : string;
   });
 
+  // validate url
   if (!URL.canParse(result)) {
     throw new TypeError(`Invalid URL: "${result}"`);
   }
-  // validate url
-  let u = new URL(result);
-  let sp = new URLSearchParams();
+
+  let url = new URL(result);
+  let searchParams = new URLSearchParams();
 
   // loop over search params and add only if there is a value
-  for (let [key, value] of u.searchParams.entries()) {
-    if (value) sp.set(key, value);
+  for (let [key, value] of url.searchParams.entries()) {
+    if (value) searchParams.set(key, value);
   }
 
-  // update search params
-  u.search = sp.toString();
+  url.search = searchParams.toString();
 
-  return u;
+  return url;
 }
