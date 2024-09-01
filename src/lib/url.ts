@@ -1,3 +1,10 @@
+/**
+ * Converts template strings and values into a URL string, removing any undefined or null values.
+ *
+ * @param {TemplateStringsArray | string} strings - The template strings or a single string.
+ * @param {...unknown} values - The values to be interpolated into the template strings.
+ * @returns {string} The resulting URL string.
+ */
 export function urlString(
   strings: TemplateStringsArray | string,
   ...values: Array<unknown>
@@ -5,6 +12,13 @@ export function urlString(
   return url(strings, ...values).toString();
 }
 
+/**
+ * Converts template strings and values into a URL string, removing any undefined or null values.
+ *
+ * @param {TemplateStringsArray | string} strings - The template strings or a single string.
+ * @param {...unknown} values - The values to be interpolated into the template strings.
+ * @returns {URL} The resulting URL.
+ */
 export function url(
   strings: TemplateStringsArray | string,
   ...values: Array<unknown>
