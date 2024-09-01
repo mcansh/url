@@ -31,7 +31,9 @@ export function url(
 
   // loop over search params and add only if there is a value
   for (let [key, value] of url.searchParams.entries()) {
-    if (value) searchParams.set(key, value);
+    if (value && !["null", "undefined"].includes(value)) {
+      searchParams.set(key, value);
+    }
   }
 
   url.search = searchParams.toString();
