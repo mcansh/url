@@ -24,8 +24,8 @@
     "dev": "tsup --watch",
     "format": "prettier --ignore-path .gitignore --ignore-path .prettierignore --ignore-unknown --write .",
     "attw": "attw --pack . --ignore-rules cjs-resolves-to-esm",
-    "test": "node --import tsimp/import --test ./src/**/*.spec.ts",
-    "test:watch": "node --watch --import tsimp/import --test ./src/**/*.spec.ts"
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test './src/**/*.spec.ts'",
+    "test:watch": "node --watch --experimental-strip-types --disable-warning=ExperimentalWarning --test './src/**/*.spec.ts'"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.1",

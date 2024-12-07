@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { urlString } from "./url.js";
+import { urlString } from "./url.ts";
 
 describe("invalid", () => {
   test("not passed a url", () => {
