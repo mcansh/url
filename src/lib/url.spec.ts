@@ -77,6 +77,16 @@ test("interpolated url with valid, and undefined/null values", () => {
   assert.equal(actual, "https://site.com/path?q=my+search");
 });
 
+test("interpolated url origin with valid, and undefined/null values", () => {
+  let filter = undefined;
+  let user = null;
+  let q = "my search";
+  let origin = "https://site.com";
+  let path = "/path";
+  let actual = urlString`${origin}/${path}?q=${q}&user=${user}&filter=${filter}`;
+  assert.equal(actual, "https://site.com/path?q=my+search");
+});
+
 test("static url with valid, and undefined/null values", () => {
   let actual = urlString`https://site.com/path?q=my+search&user=null&filter=undefined`;
   assert.equal(actual, "https://site.com/path?q=my+search");
