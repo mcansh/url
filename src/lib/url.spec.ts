@@ -83,7 +83,7 @@ test("interpolated url origin with valid, and undefined/null values", () => {
   let q = "my search";
   let origin = "https://site.com";
   let path = "/path";
-  let actual = urlString`${origin}/${path}?q=${q}&user=${user}&filter=${filter}`;
+  let actual = urlString`${origin}${path}?q=${q}&user=${user}&filter=${filter}`;
   assert.equal(actual, "https://site.com/path?q=my+search");
 });
 
