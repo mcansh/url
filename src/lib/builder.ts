@@ -1,134 +1,156 @@
-type URL = {
-  hash: string;
-  host: string;
-  hostname: string;
-  href: string;
-  origin: string;
-  password: string;
-  pathname: string;
-  port: string;
-  protocol: string;
-  search: string;
-  username: string;
-  searchParams: URLSearchParams;
-};
+type MinimalUrl = Pick<
+  URL,
+  | "protocol"
+  | "username"
+  | "password"
+  | "hostname"
+  | "port"
+  | "pathname"
+  | "hash"
+  | "searchParams"
+  | "host"
+  | "href"
+  | "origin"
+>;
 
-export function UrlBuilder() {
-  let url: URL = {
-    protocol: "https:",
+export class CreateUrlBuilder {
+  #url: MinimalUrl = {
+    protocol: "",
     username: "",
     password: "",
     hostname: "",
     port: "",
-    pathname: "/",
+    pathname: "",
     hash: "",
     searchParams: new URLSearchParams(),
     host: "",
     href: "",
     origin: "",
-    search: "",
   };
 
-  return {
-    toString() {
-      let result = url.protocol.endsWith("//")
-        ? url.protocol
-        : url.protocol + "//";
+  #buildUrl() {
+    let result = "";
 
-      if (url.username) {
-        result += url.username;
-        if (url.password) {
-          result += `:${url.password}`;
+    this.#url.protocol ||= "https:";
+    result += this.#url.protocol + "//";
+
+    if (this.#url.username) {
+      result += this.#url.username;
+      if (this.#url.password) result += `:${this.#url.password}`;
+      result += "@";
+    }
+
+    if (this.#url.hostname) result += this.#url.hostname;
+    if (this.#url.port) result += `:${this.#url.port}`;
+
+    result += this.#url.pathname ||= "/";
+
+    if (this.#url.searchParams.size) {
+      result += `?${this.#url.searchParams.toString()}`;
+    }
+
+    if (this.#url.hash) result += `#${this.#url.hash}`;
+
+    this.#url.href = result;
+    return result;
+  }
+
+  toString() {
+    return this.#buildUrl();
+  }
+
+  toJSON() {
+    return {
+      protocol: this.#url.protocol,
+      username: this.#url.username,
+      password: this.#url.password,
+      hostname: this.#url.hostname,
+      port: this.#url.port,
+      pathname: this.#url.pathname,
+      search: this.#url.searchParams.toString(),
+      hash: this.#url.hash,
+    };
+  }
+
+  toURL() {
+    return new URL(this.#buildUrl());
+  }
+
+  get search() {
+    return this.#url.searchParams.toString();
+  }
+
+  get href() {
+    return this.#buildUrl();
+  }
+
+  build() {
+    return this.#buildUrl();
+  }
+
+  domain(domain: string) {
+    if (domain.includes("://")) {
+      let [protocol, rest] = domain.split("://");
+      if (!protocol || !rest) throw new Error("Invalid URL");
+      this.protocol(protocol);
+      domain = rest;
+    }
+    this.#url.hostname = domain;
+    return this;
+  }
+
+  path(pathname: string) {
+    if (pathname.includes("?")) {
+      let [p, search] = pathname.split("?");
+      if (p) pathname = p;
+      if (search) {
+        let searchParams = new URLSearchParams(search);
+        for (let [key, val] of searchParams) {
+          this.#url.searchParams.set(key, val);
         }
-        result += "@";
       }
+    }
+    if (!pathname.startsWith("/")) pathname = "/" + pathname;
+    if (pathname.endsWith("/")) pathname = pathname.slice(0, -1);
+    this.#url.pathname = pathname;
+    return this;
+  }
 
-      if (url.hostname) {
-        result += url.hostname;
-      }
+  param<T = string>(key: string, value: T) {
+    if (value === null || typeof value == "undefined") return this;
+    let valueAsString = value.toString();
+    if (valueAsString) this.#url.searchParams.set(key, valueAsString);
+    return this;
+  }
 
-      if (url.port) {
-        result += `:${url.port}`;
-      }
+  protocol(protocol: string) {
+    this.#url.protocol = protocol;
+    return this;
+  }
 
-      if (url.pathname) {
-        result += url.pathname;
-      }
+  username(username: string) {
+    this.#url.username = username;
+    return this;
+  }
 
-      if (url.searchParams.size) {
-        result += `?${url.searchParams.toString()}`;
-      }
+  password(password: string) {
+    this.#url.password = password;
+    return this;
+  }
 
-      if (url.hash) {
-        result += `#${url.hash}`;
-      }
+  port(port: string) {
+    this.#url.port = port;
+    return this;
+  }
 
-      url.href = result;
+  hash<T = string>(key: string, value: T) {
+    if (typeof value == "undefined") return this;
+    if (this.#url.hash) this.#url.hash += `&${key}=${value}`;
+    else this.#url.hash = `${key}=${value}`;
+    return this;
+  }
+}
 
-      return url.href;
-    },
-    toJSON() {
-      return {
-        protocol: url.protocol,
-        username: url.username,
-        password: url.password,
-        hostname: url.hostname,
-        port: url.port,
-        pathname: url.pathname,
-        searchParams: Object.fromEntries(url.searchParams),
-        hash: url.hash,
-      };
-    },
-    toURL() {
-      return new URL(this.toString());
-    },
-    get href() {
-      return this.toString();
-    },
-    build() {
-      url.href = this.toString();
-      return url.href;
-    },
-    domain(domain: string) {
-      url.hostname = domain;
-      return this;
-    },
-    path(pathname: string) {
-      if (!pathname.startsWith("/")) {
-        pathname = "/" + pathname;
-      }
-      if (pathname.includes("?")) {
-        pathname = pathname.slice(0, pathname.indexOf("?"));
-      }
-      url.pathname = pathname;
-      return this;
-    },
-    param<Type = string>(key: string, value?: Type) {
-      let valueAsString = value?.toString();
-      if (valueAsString) {
-        url.searchParams.set(key, valueAsString);
-      }
-      return this;
-    },
-    protocol(protocol: string) {
-      url.protocol = protocol.endsWith("://") ? protocol : protocol + "://";
-      return this;
-    },
-    username(username: string) {
-      url.username = username;
-      return this;
-    },
-    password(password: string) {
-      url.password = password;
-      return this;
-    },
-    port(port: string) {
-      url.port = port;
-      return this;
-    },
-    hash(hash: string) {
-      url.hash = hash;
-      return this;
-    },
-  };
+export function UrlBuilder() {
+  return new CreateUrlBuilder();
 }
