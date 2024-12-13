@@ -3,10 +3,7 @@
   "version": "0.2.2",
   "license": "MIT",
   "author": "Logan McAnsh <logan@mcan.sh> (https://mcan.sh/)",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mcansh/url.git"
-  },
+  "repository": "mcansh/url",
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
