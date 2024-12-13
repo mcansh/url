@@ -1,5 +1,5 @@
 import * as assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import test, { describe, it } from "node:test";
 import { UrlBuilder } from "./builder.ts";
 
 describe("UrlBuilder", () => {
@@ -66,26 +66,6 @@ describe("UrlBuilder", () => {
     assert.equal(builder.href, "https://example.com/test");
   });
 
-  it("should return the correct JSON representation", () => {
-    const builder = UrlBuilder().new();
-    builder
-      .protocol("https")
-      .domain("example.com")
-      .path("/test")
-      .param("key", "value")
-      .hash("section");
-    assert.deepEqual(builder.toJSON(), {
-      protocol: "https",
-      username: "",
-      password: "",
-      hostname: "example.com",
-      port: "",
-      pathname: "/test",
-      search: "key=value",
-      hash: "#section",
-    });
-  });
-
   it("should return a URL object", () => {
     const builder = UrlBuilder().new();
     const url = builder
@@ -95,5 +75,32 @@ describe("UrlBuilder", () => {
       .toURL();
     assert.ok(url instanceof URL);
     assert.equal(url.href, "https://example.com/test");
+  });
+
+  /**
+   * note that the URL constructor will add a trailing slash
+   * to the url for certain protocols
+   */
+  const cases = [
+    [`ssh`, "ssh://site.com"],
+    [`data`, "data://site.com"],
+    [`mailto`, "mailto://site.com"],
+    [`tel`, "tel://site.com"],
+    [`http`, "http://site.com/"],
+    [`https`, "https://site.com/"],
+    [`https`, "https://site.com/"],
+    [`ftp`, "ftp://site.com/"],
+    [`ws`, "ws://site.com/"],
+    [`wss`, "wss://site.com/"],
+    [`file`, "file://site.com/"],
+  ] as const;
+
+  describe("should build a URL with a non https? protocol", () => {
+    for (let [input, expected] of cases) {
+      test(`${input} -> ${expected}`, () => {
+        let url = UrlBuilder().new().protocol(input).domain("site.com").build();
+        assert.equal(url, expected);
+      });
+    }
   });
 });

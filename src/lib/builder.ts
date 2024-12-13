@@ -1,133 +1,146 @@
-type MinimalUrl = Pick<
-  URL,
-  | "protocol"
-  | "username"
-  | "password"
-  | "hostname"
-  | "port"
-  | "pathname"
-  | "hash"
-  | "searchParams"
-  | "host"
-  | "origin"
->;
+type MinimalUrl = {
+  protocol: string;
+  username: string;
+  password: string;
+  domain: string;
+  port: string;
+  pathname: string;
+  hash: string;
+  searchParams: URLSearchParams;
+};
 
-export function UrlBuilder() {
-  let url: MinimalUrl = {
+class CreateUrlBuilder {
+  #url: MinimalUrl = {
     protocol: "",
     username: "",
     password: "",
-    hostname: "",
+    domain: "",
     port: "",
     pathname: "",
     hash: "",
     searchParams: new URLSearchParams(),
-    host: "",
-    origin: "",
   };
 
-  function buildUrl() {
+  #buildUrl() {
     let result = "";
 
-    url.protocol ||= "https";
-    result += url.protocol + "://";
+    this.#url.protocol ||= "https";
+    result += this.#url.protocol + "://";
 
-    if (url.username) {
-      result += url.username;
-      if (url.password) result += `:${url.password}`;
+    if (this.#url.username) {
+      result += this.#url.username;
+      if (this.#url.password) result += `:${this.#url.password}`;
       result += "@";
     }
 
-    if (url.hostname) result += url.hostname;
-    if (url.port) result += `:${url.port}`;
+    if (this.#url.domain) result += this.#url.domain;
+    if (this.#url.port) result += `:${this.#url.port}`;
 
-    result += url.pathname ||= "/";
+    // result += this.#url.pathname;
 
-    if (url.searchParams.size) {
-      result += `?${url.searchParams.toString()}`;
+    let protocolsThatRequirePathname = [
+      "http",
+      "https",
+      "https",
+      "ftp",
+      "ws",
+      "wss",
+      "file",
+    ];
+
+    result += this.#url.pathname;
+    if (protocolsThatRequirePathname.includes(this.#url.protocol)) {
+      if (!this.#url.pathname) result += "/";
     }
 
-    if (url.hash) result += `#${url.hash}`;
+    if (this.#url.searchParams.size) {
+      result += `?${this.#url.searchParams.toString()}`;
+    }
+
+    if (this.#url.hash) result += `#${this.#url.hash}`;
 
     return result;
   }
 
+  param<T = string>(key: string, value: T) {
+    if (value === null || typeof value == "undefined") return this;
+    let valueAsString = value.toString();
+    if (valueAsString) this.#url.searchParams.set(key, valueAsString);
+    return this;
+  }
+
+  path(pathname: string) {
+    if (pathname.includes("?")) {
+      pathname = pathname.split("?")[0] || "";
+    }
+    if (!pathname.startsWith("/")) pathname = "/" + pathname;
+    if (pathname.endsWith("/")) pathname = pathname.slice(0, -1);
+    this.#url.pathname = pathname;
+    return this;
+  }
+
+  protocol(protocol: string) {
+    this.#url.protocol = protocol;
+    return this;
+  }
+
+  username(username: string) {
+    this.#url.username = username;
+    return this;
+  }
+
+  password(password: string) {
+    this.#url.password = password;
+    return this;
+  }
+
+  domain(domain: string) {
+    if (domain.includes("://")) {
+      let [protocol, rest] = domain.split("://");
+      if (!protocol || !rest) throw new Error("Invalid URL");
+      this.protocol(protocol);
+      domain = rest;
+    }
+    this.#url.domain = domain;
+    return this;
+  }
+
+  port(port: number | string) {
+    this.#url.port = String(port);
+    return this;
+  }
+
+  hash(hash: string) {
+    this.#url.hash = hash;
+    return this;
+  }
+
+  build() {
+    return this.#buildUrl();
+  }
+
+  toString() {
+    return this.#buildUrl();
+  }
+
+  get href() {
+    return this.#buildUrl();
+  }
+
+  toURL() {
+    let url = this.#buildUrl();
+    return new URL(url);
+  }
+
+  get search() {
+    return this.#url.searchParams.toString();
+  }
+}
+
+export function UrlBuilder() {
   return {
     new() {
-      return {
-        build() {
-          return buildUrl();
-        },
-        toString() {
-          return buildUrl();
-        },
-        get href() {
-          return buildUrl();
-        },
-        toJSON() {
-          return {
-            protocol: url.protocol,
-            username: url.username,
-            password: url.password,
-            hostname: url.hostname,
-            port: url.port,
-            pathname: url.pathname,
-            search: url.searchParams.toString(),
-            hash: url.hash ? `#${url.hash}` : "",
-          };
-        },
-        toURL() {
-          return new URL(buildUrl());
-        },
-        get search() {
-          return url.searchParams.toString();
-        },
-        param<T = string>(key: string, value: T) {
-          if (value === null || typeof value == "undefined") return this;
-          let valueAsString = value.toString();
-          if (valueAsString) url.searchParams.set(key, valueAsString);
-          return this;
-        },
-        path(pathname: string) {
-          if (pathname.includes("?")) {
-            pathname = pathname.split("?")[0] || "/";
-          }
-          if (!pathname.startsWith("/")) pathname = "/" + pathname;
-          if (pathname.endsWith("/")) pathname = pathname.slice(0, -1);
-          url.pathname = pathname;
-          return this;
-        },
-        protocol(protocol: string) {
-          url.protocol = protocol;
-          return this;
-        },
-        username(username: string) {
-          url.username = username;
-          return this;
-        },
-        password(password: string) {
-          url.password = password;
-          return this;
-        },
-        domain(domain: string) {
-          if (domain.includes("://")) {
-            let [protocol, rest] = domain.split("://");
-            if (!protocol || !rest) throw new Error("Invalid URL");
-            this.protocol(protocol);
-            domain = rest;
-          }
-          url.hostname = domain;
-          return this;
-        },
-        port(port: number | string) {
-          url.port = String(port);
-          return this;
-        },
-        hash(hash: string) {
-          url.hash = hash;
-          return this;
-        },
-      };
+      return new CreateUrlBuilder();
     },
   };
 }

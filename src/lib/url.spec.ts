@@ -28,7 +28,6 @@ describe("invalid", () => {
  * note that the URL constructor will add a trailing slash
  * to the url for certain protocols
  */
-
 const cases = [
   [`ssh://site.com`, "ssh://site.com"],
   [`data://site.com`, "data://site.com"],
