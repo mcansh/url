@@ -1,77 +1,99 @@
 import * as assert from "node:assert/strict";
-import { describe, test } from "node:test";
+import { describe, it } from "node:test";
 import { UrlBuilder } from "./builder.ts";
 
 describe("UrlBuilder", () => {
-  test("can set domain", () => {
-    let url = UrlBuilder().domain("example.com");
-    assert.equal(url.toURL().hostname, "example.com");
-    assert.equal(url.build(), "https://example.com/");
+  it("should build a basic URL", () => {
+    const builder = UrlBuilder().new();
+    const url = builder.protocol("https").domain("example.com").build();
+    assert.equal(url, "https://example.com/");
   });
 
-  test("can set path", () => {
-    let assertion = "https://example.com/path";
-    assert.equal(
-      UrlBuilder().domain("example.com").path("/path").build(),
-      assertion,
-    );
-    assert.equal(
-      UrlBuilder().domain("example.com").path("path").build(),
-      assertion,
-    );
-    assert.equal(
-      UrlBuilder().domain("example.com").path("/path/").build(),
-      assertion,
-    );
-  });
-
-  test("can set searchParams", () => {
-    let url = UrlBuilder().domain("example.com").param("q", "my search");
-    assert.equal(url.toURL().searchParams.get("q"), "my search");
-    assert.equal(url.build(), "https://example.com/?q=my+search");
-  });
-
-  test("can set searchParams that's not a string", () => {
-    let url = UrlBuilder()
+  it("should build a URL with path", () => {
+    const builder = UrlBuilder().new();
+    const url = builder
+      .protocol("https")
       .domain("example.com")
-      .param<number>("userId", 5)
-      .param("filter", "category");
-
-    assert.equal(url.toURL().searchParams.get("userId"), "5");
-    assert.equal(url.toURL().searchParams.get("filter"), "category");
-
-    assert.equal(url.build(), "https://example.com/?userId=5&filter=category");
+      .path("/test")
+      .build();
+    assert.equal(url, "https://example.com/test");
   });
 
-  test("builders", () => {
-    let instance = UrlBuilder()
-      .domain("site.com")
-      .param("q", "my search")
-      .param<number>("userId", 5)
-      .param<string>("filter", "category");
+  it("should build a URL with query parameters", () => {
+    const builder = UrlBuilder().new();
+    const url = builder
+      .protocol("https")
+      .domain("example.com")
+      .param("key", "value")
+      .build();
+    assert.equal(url, "https://example.com/?key=value");
+  });
 
-    let assertion = "https://site.com/?q=my+search&userId=5&filter=category";
+  it("should build a URL with hash", () => {
+    const builder = UrlBuilder().new();
+    const url = builder
+      .protocol("https")
+      .domain("example.com")
+      .hash("section")
+      .build();
+    assert.equal(url, "https://example.com/#section");
+  });
 
-    let url = instance.toURL();
-    let json = instance.toJSON();
-    let href = instance.href;
-    let string = instance.toString();
+  it("should build a URL with username and password", () => {
+    const builder = UrlBuilder().new();
+    const url = builder
+      .protocol("https")
+      .domain("example.com")
+      .username("user")
+      .password("pass")
+      .build();
+    assert.equal(url, "https://user:pass@example.com/");
+  });
 
-    assert.ok(url instanceof URL);
-    assert.ok(typeof href === "string");
-    assert.ok(typeof string === "string");
-    assert.ok(typeof json === "object");
-    assert.equal(href, assertion);
-    assert.equal(string, assertion);
-    assert.deepEqual(json, {
-      protocol: "https:",
+  it("should build a URL with port", () => {
+    const builder = UrlBuilder().new();
+    const url = builder
+      .protocol("https")
+      .domain("example.com")
+      .port(8080)
+      .build();
+    assert.equal(url, "https://example.com:8080/");
+  });
+
+  it("should return the correct href", () => {
+    const builder = UrlBuilder().new();
+    builder.protocol("https").domain("example.com").path("/test");
+    assert.equal(builder.href, "https://example.com/test");
+  });
+
+  it("should return the correct JSON representation", () => {
+    const builder = UrlBuilder().new();
+    builder
+      .protocol("https")
+      .domain("example.com")
+      .path("/test")
+      .param("key", "value")
+      .hash("section");
+    assert.deepEqual(builder.toJSON(), {
+      protocol: "https",
       username: "",
       password: "",
-      hostname: "site.com",
+      hostname: "example.com",
       port: "",
-      pathname: "/",
-      search: "q=my+search&userId=5&filter=category",
-      hash: "",
+      pathname: "/test",
+      search: "key=value",
+      hash: "#section",
     });
+  });
+
+  it("should return a URL object", () => {
+    const builder = UrlBuilder().new();
+    const url = builder
+      .protocol("https")
+      .domain("example.com")
+      .path("/test")
+      .toURL();
+    assert.ok(url instanceof URL);
+    assert.equal(url.href, "https://example.com/test");
   });
 });

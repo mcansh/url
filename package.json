@@ -5,10 +5,9 @@
   "author": "Logan McAnsh <logan@mcan.sh> (https://mcan.sh/)",
   "type": "module",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
+    ".": "./dist/index.js",
+    "./url": "./dist/url.js",
+    "./builder": "./dist/builder.js",
     "./package.json": "./package.json"
   },
   "module": "dist/index.js",
