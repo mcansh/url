@@ -26,6 +26,32 @@ export function UrlBuilder() {
     origin: "",
   };
 
+  function buildUrl() {
+    let result = "";
+
+    url.protocol ||= "https";
+    result += url.protocol + "://";
+
+    if (url.username) {
+      result += url.username;
+      if (url.password) result += `:${url.password}`;
+      result += "@";
+    }
+
+    if (url.hostname) result += url.hostname;
+    if (url.port) result += `:${url.port}`;
+
+    result += url.pathname ||= "/";
+
+    if (url.searchParams.size) {
+      result += `?${url.searchParams.toString()}`;
+    }
+
+    if (url.hash) result += `#${url.hash}`;
+
+    return result;
+  }
+
   return {
     new() {
       return {
@@ -102,32 +128,6 @@ export function UrlBuilder() {
           return this;
         },
       };
-
-      function buildUrl() {
-        let result = "";
-
-        url.protocol ||= "https";
-        result += url.protocol + "://";
-
-        if (url.username) {
-          result += url.username;
-          if (url.password) result += `:${url.password}`;
-          result += "@";
-        }
-
-        if (url.hostname) result += url.hostname;
-        if (url.port) result += `:${url.port}`;
-
-        result += url.pathname ||= "/";
-
-        if (url.searchParams.size) {
-          result += `?${url.searchParams.toString()}`;
-        }
-
-        if (url.hash) result += `#${url.hash}`;
-
-        return result;
-      }
     },
   };
 }
