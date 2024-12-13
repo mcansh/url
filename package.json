@@ -6,8 +6,6 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./url": "./dist/url.js",
-    "./builder": "./dist/builder.js",
     "./package.json": "./package.json"
   },
   "module": "dist/index.js",
