@@ -74,7 +74,6 @@ class CreateUrlBuilder {
       pathname = pathname.split("?")[0] || "";
     }
     if (!pathname.startsWith("/")) pathname = "/" + pathname;
-    if (pathname.endsWith("/")) pathname = pathname.slice(0, -1);
     this.#url.pathname = pathname;
     return this;
   }
