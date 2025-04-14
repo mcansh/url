@@ -1,145 +1,112 @@
-type MinimalUrl = {
-  protocol: string;
-  username: string;
-  password: string;
-  domain: string;
-  port: string;
-  pathname: string;
-  hash: string;
-  searchParams: URLSearchParams;
-};
+type QueryParams = Record<string, string | number | boolean | undefined>;
 
-class CreateUrlBuilder {
-  #url: MinimalUrl = {
-    protocol: "",
-    username: "",
-    password: "",
-    domain: "",
-    port: "",
-    pathname: "",
-    hash: "",
-    searchParams: new URLSearchParams(),
-  };
+const protocolsWithTrailingSlash = new Set([
+  "http",
+  "https",
+  "ftp",
+  "ws",
+  "wss",
+  "file",
+] as const);
 
-  #buildUrl() {
-    let result = "";
+type protocolsWithTrailingSlash =
+  typeof protocolsWithTrailingSlash extends Set<infer T> ? T : never;
 
-    this.#url.protocol ||= "https";
-    result += this.#url.protocol + "://";
+export class URLBuilder {
+  private protocolValue: string = "http";
+  private domainValue: string = "";
+  private readonly pathSegments: string[] = [];
+  private queryParams: QueryParams = {};
+  private hashValue: string = "";
 
-    if (this.#url.username) {
-      result += this.#url.username;
-      if (this.#url.password) result += `:${this.#url.password}`;
-      result += "@";
+  protocol(protocol: string): Omit<this, "protocol"> {
+    this.protocolValue = protocol.replace(/:$/, ""); // Remove trailing colon if present
+    return this;
+  }
+
+  domain(domain: string): Omit<this, "domain"> {
+    this.domainValue = domain.replace(/^\/+|\/+$/g, ""); // Trim slashes
+    return this;
+  }
+
+  path(path: string): Omit<this, "path"> {
+    this.pathSegments.push(path.replace(/^\/+|\/+$/g, "")); // Trim slashes
+    return this;
+  }
+
+  param(key: string, value: string | number | boolean | undefined): this {
+    if (value !== undefined) {
+      this.queryParams[key] = value;
+    }
+    return this;
+  }
+
+  hash(hash: string): this {
+    this.hashValue = hash.replace(/^#/, ""); // Remove leading hash if present
+    return this;
+  }
+
+  username(username: string): Omit<this, "username"> {
+    this.domainValue = `${username}@${this.domainValue}`;
+    return this;
+  }
+
+  password(password: string): Omit<this, "password"> {
+    const [username, domain] = this.domainValue.split("@");
+    this.domainValue = `${username}:${password}@${domain}`;
+    return this;
+  }
+
+  port(port: number): Omit<this, "port"> {
+    this.domainValue = `${this.domainValue}:${port}`;
+    return this;
+  }
+
+  toURL(): URL {
+    const urlString = this.build();
+    return new URL(urlString);
+  }
+
+  get href(): string {
+    return this.build();
+  }
+
+  build(): string {
+    if (!this.domainValue) {
+      throw new Error("Domain is required to build the URL.");
     }
 
-    if (this.#url.domain) result += this.#url.domain;
-    if (this.#url.port) result += `:${this.#url.port}`;
+    let path =
+      this.pathSegments.length > 0 ? `/${this.pathSegments.join("/")}` : "";
 
-    // result += this.#url.pathname;
-
-    let protocolsThatRequirePathname = [
-      "http",
-      "https",
-      "https",
-      "ftp",
-      "ws",
-      "wss",
-      "file",
-    ];
-
-    result += this.#url.pathname;
-    if (protocolsThatRequirePathname.includes(this.#url.protocol)) {
-      if (!this.#url.pathname) result += "/";
+    // Handle trailing slash for certain protocols when no path is provided
+    if (
+      this.pathSegments.length === 0 &&
+      protocolsWithTrailingSlash.has(
+        this.protocolValue as protocolsWithTrailingSlash,
+      )
+    ) {
+      path += "/";
     }
 
-    if (this.#url.searchParams.size) {
-      result += `?${this.#url.searchParams.toString()}`;
-    }
+    const query = Object.keys(this.queryParams)
+      .map(
+        (key) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(String(this.queryParams[key]))}`,
+      )
+      .join("&");
+    const queryString = query ? `?${query}` : "";
+    const hashString = this.hashValue ? `#${this.hashValue}` : "";
 
-    if (this.#url.hash) result += `#${this.#url.hash}`;
-
-    return result;
-  }
-
-  param<T = string>(key: string, value: T) {
-    if (value === null || typeof value == "undefined") return this;
-    let valueAsString = value.toString();
-    if (valueAsString) this.#url.searchParams.set(key, valueAsString);
-    return this;
-  }
-
-  path(pathname: string) {
-    if (pathname.includes("?")) {
-      pathname = pathname.split("?")[0] || "";
-    }
-    if (!pathname.startsWith("/")) pathname = "/" + pathname;
-    this.#url.pathname = pathname;
-    return this;
-  }
-
-  protocol(protocol: string) {
-    this.#url.protocol = protocol;
-    return this;
-  }
-
-  username(username: string) {
-    this.#url.username = username;
-    return this;
-  }
-
-  password(password: string) {
-    this.#url.password = password;
-    return this;
-  }
-
-  domain(domain: string) {
-    if (domain.includes("://")) {
-      let [protocol, rest] = domain.split("://");
-      if (!protocol || !rest) throw new Error("Invalid URL");
-      this.protocol(protocol);
-      domain = rest;
-    }
-    this.#url.domain = domain;
-    return this;
-  }
-
-  port(port: number | string) {
-    this.#url.port = String(port);
-    return this;
-  }
-
-  hash(hash: string) {
-    this.#url.hash = hash;
-    return this;
-  }
-
-  build() {
-    return this.#buildUrl();
-  }
-
-  toString() {
-    return this.#buildUrl();
-  }
-
-  get href() {
-    return this.#buildUrl();
-  }
-
-  toURL() {
-    let url = this.#buildUrl();
-    return new URL(url);
-  }
-
-  get search() {
-    return this.#url.searchParams.toString();
+    return `${this.protocolValue}://${this.domainValue}${path}${queryString}${hashString}`;
   }
 }
 
-export function UrlBuilder() {
-  return {
-    new() {
-      return new CreateUrlBuilder();
-    },
-  };
-}
+// Example usage:
+const url = new URLBuilder()
+  .protocol("https")
+  .domain("example.com")
+  .path("/test")
+  .build();
+
+console.log(url); // Output: https://example.com/test
