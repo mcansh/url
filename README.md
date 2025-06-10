@@ -25,8 +25,7 @@ a url builder based on [this tweet](https://x.com/SirSeanOfLoxley/status/1793626
 ```ts
 import { UrlBuilder } from "@mcansh/url";
 
-UrlBuilder()
-  .new()
+new UrlBuilder()
   .domain("site.com")
   .path("/path")
   .param("q", "my search")
