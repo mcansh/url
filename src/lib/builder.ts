@@ -42,7 +42,8 @@ export class UrlBuilder {
   }
 
   hash(hash: string): this {
-    this.hashValue = hash.replace(/^#/, ""); // Remove leading hash if present
+    // Append hash, removing leading hashes
+    this.hashValue = this.hashValue + `#${hash.replace(/^#+/, "")}`;
     return this;
   }
 
@@ -96,7 +97,7 @@ export class UrlBuilder {
       )
       .join("&");
     const queryString = query ? `?${query}` : "";
-    const hashString = this.hashValue ? `#${this.hashValue}` : "";
+    const hashString = this.hashValue ? this.hashValue : "";
 
     return `${this.protocolValue}://${this.domainValue}${path}${queryString}${hashString}`;
   }

@@ -39,6 +39,17 @@ describe("UrlBuilder", () => {
     assert.equal(url, "https://example.com/#section");
   });
 
+  it("should build a URL with mutliple hashs", () => {
+    const builder = new UrlBuilder();
+    const url = builder
+      .protocol("https")
+      .domain("example.com")
+      .hash("section")
+      .hash("another")
+      .build();
+    assert.equal(url, "https://example.com/#section#another");
+  });
+
   it("should build a URL with username and password", () => {
     const builder = new UrlBuilder();
     const url = builder
