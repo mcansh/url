@@ -12,7 +12,7 @@ const protocolsWithTrailingSlash = new Set([
 type protocolsWithTrailingSlash =
   typeof protocolsWithTrailingSlash extends Set<infer T> ? T : never;
 
-export class URLBuilder {
+export class UrlBuilder {
   private protocolValue: string = "http";
   private domainValue: string = "";
   private readonly pathSegments: string[] = [];
@@ -102,11 +102,4 @@ export class URLBuilder {
   }
 }
 
-// Example usage:
-const url = new URLBuilder()
-  .protocol("https")
-  .domain("example.com")
-  .path("/test")
-  .build();
 
-console.log(url); // Output: https://example.com/test

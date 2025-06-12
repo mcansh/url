@@ -1,16 +1,16 @@
 import * as assert from "node:assert/strict";
 import test, { describe, it } from "node:test";
-import { URLBuilder } from "./builder.ts";
+import { UrlBuilder } from "./builder.ts";
 
-describe("URLBuilder", () => {
+describe("UrlBuilder", () => {
   it("should build a basic URL", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     const url = builder.protocol("https").domain("example.com").build();
     assert.equal(url, "https://example.com/");
   });
 
   it("should build a URL with path", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     const url = builder
       .protocol("https")
       .domain("example.com")
@@ -20,7 +20,7 @@ describe("URLBuilder", () => {
   });
 
   it("should build a URL with query parameters", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     const url = builder
       .protocol("https")
       .domain("example.com")
@@ -30,7 +30,7 @@ describe("URLBuilder", () => {
   });
 
   it("should build a URL with hash", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     const url = builder
       .protocol("https")
       .domain("example.com")
@@ -40,7 +40,7 @@ describe("URLBuilder", () => {
   });
 
   it("should build a URL with username and password", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     const url = builder
       .protocol("https")
       .domain("example.com")
@@ -51,7 +51,7 @@ describe("URLBuilder", () => {
   });
 
   it("should build a URL with port", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     const url = builder
       .protocol("https")
       .domain("example.com")
@@ -61,13 +61,13 @@ describe("URLBuilder", () => {
   });
 
   it("should return the correct href", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     builder.protocol("https").domain("example.com").path("/test");
     assert.equal(builder.href, "https://example.com/test");
   });
 
   it("should return a URL object", () => {
-    const builder = new URLBuilder();
+    const builder = new UrlBuilder();
     const url = builder
       .protocol("https")
       .domain("example.com")
@@ -100,7 +100,7 @@ describe("URLBuilder", () => {
     (t) => {
       for (let [input, expected] of cases) {
         t.test(`${input} -> ${expected}`, () => {
-          let url = new URLBuilder().protocol(input).domain("site.com").build();
+          let url = new UrlBuilder().protocol(input).domain("site.com").build();
           assert.equal(url, expected);
         });
       }
