@@ -1,5 +1,8 @@
 # @mcansh/url
 
+> [!NOTE]  
+> This repo is now part of [mcansh/packages](https://github.com/mcansh/packages/tree/main/packages/url)
+
 a template string function to create urls and only keeping search params with values - based on [this tweet](https://x.com/Steve8708/status/1792939860820644201)
 
 ```ts
